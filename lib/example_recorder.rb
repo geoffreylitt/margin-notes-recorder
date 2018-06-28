@@ -57,6 +57,14 @@ module ExampleRecorder
       @trace.disable
     end
 
+    def start!
+      @trace.enable 
+    end
+
+    def stop!
+      @trace.disable
+    end
+
     def serialized_examples
       array = @examples.map { |example| serialize_example(example) }
       JSON.dump(array)
