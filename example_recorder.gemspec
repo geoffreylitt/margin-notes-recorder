@@ -7,11 +7,11 @@ Gem::Specification.new do |spec|
   spec.name          = "example_recorder"
   spec.version       = ExampleRecorder::VERSION
   spec.authors       = ["Geoffrey Litt"]
-  spec.email         = ["glitt@panoramaed.com"]
+  spec.email         = ["gklitt@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = "Record examples of data flowing through Ruby programs"
+  spec.description   = "Record examples of data flowing through Ruby programs"
+  spec.homepage      = "https://github.com/geoffreylitt/example-recorder"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
