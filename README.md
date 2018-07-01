@@ -5,4 +5,4 @@ and serializes the result.
 
 Intended for viewing the data alongside the code with this UI:
 
-![Frontend UI](https://github.com/geoffreylitt/example-docs)
+[Frontend UI](https://github.com/geoffreylitt/example-docs)
