@@ -38,10 +38,12 @@ require 'set'
 
 module ExampleRecorder
   class Recorder
-    def initialize
+    def initialize(path:)
       @examples = []
       # functions where we've done the call but haven't returned yet
       @in_progress_examples = {}
+
+      @path = path
 
       @trace = trace
 
@@ -65,54 +67,59 @@ module ExampleRecorder
       @trace.disable
     end
 
-    def serialized_examples
-      array = @examples.map { |example| serialize_example(example) }
+    def serialized_examples(limit: 100)
+      array = @examples.first(limit).map { |example| serialize_example(example) }
       JSON.dump(array)
     end
 
     private
 
+    attr_accessor :path
+
     def trace
       TracePoint.new(:call, :return) do |tp|
-        next if tp.defined_class == ExampleRecorder
+        begin
+          next unless tp.path.include?(path)
 
-        method_obj = tp.self.method(tp.method_id)
-        params_with_values = method_obj.parameters.map do |(_, name)|
-          [name, tp.binding.local_variable_get(name)]
-        end.to_h
+          method_obj = tp.self.method(tp.method_id)
+          params_with_values = method_obj.parameters.map do |(_, name)|
+            [name, tp.binding.local_variable_get(name)]
+          end.to_h
 
-        # attrs_to_print = [params_with_values, tp.lineno, tp.defined_class, tp.method_id, tp.event, caller(0)]
-        # attrs_to_print << tp.return_value if tp.event == :return
+          # attrs_to_print = [params_with_values, tp.lineno, tp.defined_class, tp.method_id, tp.event, caller(0)]
+          # attrs_to_print << tp.return_value if tp.event == :return
 
-        key = [tp.defined_class, tp.method_id, caller(0).size]
+          key = [tp.defined_class, tp.method_id, caller(0).size]
 
-        if tp.event == :call
-          @in_progress_examples[key] = {
-            klass: tp.defined_class,
-            method: method_obj,
-            parameters: method_obj.parameters,
-            arguments: params_with_values,
+          if tp.event == :call
+            @in_progress_examples[key] = {
+              klass: tp.defined_class,
+              method: method_obj,
+              parameters: method_obj.parameters,
+              arguments: params_with_values,
 
-            # Previously was including callstack here but too noisy.
-            # maybe add back later
-            # callstack: caller(0)
-          }
-        elsif tp.event == :return
-          in_progress_example = @in_progress_examples[key]
-
-          unless in_progress_example.nil?
-            in_progress_example[:return_value] = {
-              class_name: tp.return_value.class.name,
-              value: tp.return_value
+              # Previously was including callstack here but too noisy.
+              # maybe add back later
+              # callstack: caller(0)
             }
+          elsif tp.event == :return
+            in_progress_example = @in_progress_examples[key]
 
-            unique_example_key = in_progress_example.slice(:method, :arguments, :return_value)
-            next if @seen_examples_set.include?(unique_example_key)
+            unless in_progress_example.nil?
+              in_progress_example[:return_value] = {
+                class_name: tp.return_value.class.name,
+                value: tp.return_value
+              }
 
-            @seen_examples_set << unique_example_key
-            @examples << in_progress_example
-            @in_progress_examples.delete(key)
+              unique_example_key = in_progress_example.slice(:method, :arguments, :return_value)
+              next if @seen_examples_set.include?(unique_example_key)
+
+              @seen_examples_set << unique_example_key
+              @examples << in_progress_example
+              @in_progress_examples.delete(key)
+            end
           end
+        rescue NameError
         end
       end
     end
