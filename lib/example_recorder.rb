@@ -108,7 +108,7 @@ module ExampleRecorder
             unless in_progress_example.nil?
               in_progress_example[:return_value] = {
                 class_name: tp.return_value.class.name,
-                value: tp.return_value
+                value: serialize_value(tp.return_value)
               }
 
               unique_example_key = in_progress_example.slice(:method, :arguments, :return_value)
@@ -136,12 +136,30 @@ module ExampleRecorder
           name,
           {
             class_name: value.class.name,
-            value: value
+            value: serialize_value(value)
           }
         ]
       end.to_h
 
       example
+    end
+
+    SERIALIZABLE_TYPES = [Hash, Array, String, Numeric]
+
+    # given a value, make a serialized version for display in the app.
+    # basic idea is to try to show an awesome and sensible representation,
+    # and if that's not available fall back to dumping some useful state
+    def serialize_value(value)
+      SERIALIZABLE_TYPES.each do |serializable_type|
+        return value if value.is_a? serializable_type
+      end
+
+      # return value.to_h if value.respond_to?(:to_h)
+
+      # convert ivars on the object into a hash and return that
+      value.instance_variables.each_with_object({}) do |variable_name, hash|
+        hash[variable_name] = value.instance_variable_get(variable_name)
+      end
     end
   end
 end
