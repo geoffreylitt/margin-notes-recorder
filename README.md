@@ -1,10 +1,10 @@
 # Margin Notes
 
-![Screenshot of the Margin Notes UI](screenshots/margin-notes-screenshot.png)
-
 Programmers working on large codebases frequently need to understand APIs for existing code. Manual documentation is helpful, but takes time to maintain and often doesn’t include enough examples.
 
 Margin Notes automatically generates code documentation by recording example data from function calls as a program executes and displaying those examples in an interactive UI next to the code. This allows programmers to quickly view many examples from past executions as they read the code, helping them efficiently gain insight into the behavior of the program.
+
+## This repo
 
 This repo contains the code for the Ruby example data recorder.
 
@@ -13,6 +13,7 @@ serialize the result to JSON. The JSON data can then be viewed in
 the [interactive web viewer](https://github.com/geoffreylitt/margin-notes-ui).
 
 [Read the full interactive essay](https://geoffreylitt.com/margin-notes/)
+to see how these examples can help with reading code.
 
 ## Using the gem
 
